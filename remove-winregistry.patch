@@ -1,0 +1,74 @@
+--- plugins/org.python.pydev/src/org/python/pydev/ui/pythonpathconf/PythonInterpreterProviderFactory.java.orig	2013-11-05 17:35:28.000000000 +0200
++++ plugins/org.python.pydev/src/org/python/pydev/ui/pythonpathconf/PythonInterpreterProviderFactory.java	2013-11-11 11:01:42.396817944 +0200
+@@ -25,9 +25,6 @@ import org.python.pydev.runners.SimpleRu
+ import org.python.pydev.shared_core.string.StringUtils;
+ import org.python.pydev.shared_core.utils.PlatformUtils;
+ 
+-import at.jta.Key;
+-import at.jta.Regor;
+-
+ public class PythonInterpreterProviderFactory extends AbstractInterpreterProviderFactory {
+ 
+     public IInterpreterProvider[] getInterpreterProviders(InterpreterType type) {
+@@ -63,46 +60,6 @@ public class PythonInterpreterProviderFa
+         } else {
+             // On windows we can try to see the installed versions...
+             List<String> foundVersions = new ArrayList<String>();
+-            try {
+-                Regor regor = new Regor();
+-
+-                // The structure for Python is something as
+-                // Software\\Python\\PythonCore\\2.6\\InstallPath
+-                for (Key root : new Key[] { Regor.HKEY_LOCAL_MACHINE, Regor.HKEY_CURRENT_USER }) {
+-                    Key key = regor.openKey(root, "Software\\Python\\PythonCore", Regor.KEY_READ);
+-                    if (key != null) {
+-                        try {
+-                            @SuppressWarnings("rawtypes")
+-                            List l = regor.listKeys(key);
+-                            for (Object o : l) {
+-                                Key openKey = regor.openKey(key, (String) o + "\\InstallPath", Regor.KEY_READ);
+-                                if (openKey != null) {
+-                                    try {
+-                                        byte buf[] = regor.readValue(openKey, "");
+-                                        if (buf != null) {
+-                                            String parseValue = Regor.parseValue(buf);
+-                                            // Ok, this should be the directory
+-                                            // where it's installed, try to find
+-                                            // a 'python.exe' there...
+-                                            File file = new File(parseValue, "python.exe");
+-                                            if (file.isFile()) {
+-                                                foundVersions.add(file.toString());
+-                                            }
+-                                        }
+-                                    } finally {
+-                                        regor.closeKey(openKey);
+-                                    }
+-                                }
+-                            }
+-                        } finally {
+-                            regor.closeKey(key);
+-                        }
+-                    }
+-                }
+-
+-            } catch (Throwable e) {
+-                Log.log(e);
+-            }
+             if (foundVersions.size() > 0) {
+                 return AlreadyInstalledInterpreterProvider.create("python",
+                         foundVersions.toArray(new String[foundVersions.size()]));
+--- plugins/org.python.pydev/build.properties.orig	2014-07-31 14:13:39.439344020 +0100
++++ plugins/org.python.pydev/build.properties	2014-07-31 14:13:57.866059652 +0100
+@@ -8,10 +8,8 @@
+                about.mappings,\
+                pydev.png,\
+                plugin.properties,\
+-               LICENSE.txt,\
+-               libs/,\
+-               libs/WinRegistry-4.5.jar,\
+-               css/
++               LICENSE.txt,\
++               css/
+ jars.compile.order = pydev.jar
+ source.pydev.jar = src/,\
+                    src_navigator/,\
