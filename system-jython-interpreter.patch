@@ -1,0 +1,57 @@
+diff --git a/plugins/org.python.pydev/src/org/python/pydev/runners/SimpleJythonRunner.java b/plugins/org.python.pydev/src/org/python/pydev/runners/SimpleJythonRunner.java
+index 1b3d84c..3347fe4 100644
+--- a/plugins/org.python.pydev/src/org/python/pydev/runners/SimpleJythonRunner.java
++++ b/plugins/org.python.pydev/src/org/python/pydev/runners/SimpleJythonRunner.java
+@@ -74,19 +74,24 @@ public class SimpleJythonRunner extends SimpleRunner {
+             String javaLoc = javaExecutable.getCanonicalPath();
+             String[] s;
+ 
+-            //In Jython 2.5b0, if we don't set python.home, it won't be able to calculate the correct PYTHONPATH
+-            //(see http://bugs.jython.org/issue1214 )
+-
+-            String pythonHome = new File(jythonJar).getParent().toString();
+-
+-            if (additionalPythonpath != null) {
+-                jythonJar += SimpleRunner.getPythonPathSeparator();
+-                jythonJar += additionalPythonpath;
+-                s = new String[] { javaLoc, "-Dpython.path=" + additionalPythonpath, "-Dpython.home=" + pythonHome,
+-                        "-classpath", jythonJar, "org.python.util.jython", script };
++            if (new File(jythonJar).getName().equals("jython")) {
++                //The system jython can simply be invoked directly
++                s = new String[] { jythonJar, script };
+             } else {
+-                s = new String[] { javaLoc, "-Dpython.home=" + pythonHome, "-classpath", jythonJar,
+-                        "org.python.util.jython", script };
++                //In Jython 2.5b0, if we don't set python.home, it won't be able to calculate the correct PYTHONPATH
++                //(see http://bugs.jython.org/issue1214 )
++
++                String pythonHome = new File(jythonJar).getParent().toString();
++
++                if (additionalPythonpath != null) {
++                    jythonJar += SimpleRunner.getPythonPathSeparator();
++                    jythonJar += additionalPythonpath;
++                    s = new String[] { javaLoc, "-Dpython.path=" + additionalPythonpath, "-Dpython.home=" + pythonHome,
++                            "-classpath", jythonJar, "org.python.util.jython", script };
++                } else {
++                    s = new String[] { javaLoc, "-Dpython.home=" + pythonHome, "-classpath", jythonJar,
++                            "org.python.util.jython", script };
++                }
+             }
+ 
+             if (args != null && args.length > 0) {
+diff --git a/plugins/org.python.pydev/src/org/python/pydev/ui/pythonpathconf/InterpreterInfo.java b/plugins/org.python.pydev/src/org/python/pydev/ui/pythonpathconf/InterpreterInfo.java
+index cd9d921..6ab5ccc 100644
+--- a/plugins/org.python.pydev/src/org/python/pydev/ui/pythonpathconf/InterpreterInfo.java
++++ b/plugins/org.python.pydev/src/org/python/pydev/ui/pythonpathconf/InterpreterInfo.java
+@@ -1436,9 +1436,9 @@ public class InterpreterInfo implements IInterpreterInfo {
+      */
+     public static boolean isJythonExecutable(String executable) {
+         if (executable.endsWith("\"")) {
+-            return executable.endsWith(".jar\"");
++            return executable.endsWith(".jar\"") || executable.endsWith("jython\"");
+         }
+-        return executable.endsWith(".jar");
++        return executable.endsWith(".jar") || executable.endsWith("jython");
+     }
+ 
+     /**
