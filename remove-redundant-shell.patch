@@ -1,0 +1,13 @@
+diff --git a/plugins/org.python.pydev/src/org/python/pydev/plugin/preferences/CheckDefaultPreferencesDialog.java b/plugins/org.python.pydev/src/org/python/pydev/plugin/preferences/CheckDefaultPreferencesDialog.java
+index 3752c82..2f87c2a 100644
+--- a/plugins/org.python.pydev/src/org/python/pydev/plugin/preferences/CheckDefaultPreferencesDialog.java
++++ b/plugins/org.python.pydev/src/org/python/pydev/plugin/preferences/CheckDefaultPreferencesDialog.java
+@@ -235,7 +234,7 @@ public class CheckDefaultPreferencesDialog extends TrayDialog {
+                         return;
+                     }
+                     Display disp = Display.getCurrent();
+-                    Shell shell = new Shell(disp);
++                    Shell shell = disp.getActiveShell();
+                     CheckDefaultPreferencesDialog dialog = new CheckDefaultPreferencesDialog(shell, missing);
+                     showing = true;
+                     try {

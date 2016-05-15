@@ -5,15 +5,23 @@
 # Turn off the brp-python-bytecompile script
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-scl-python-bytecompile[[:space:]].*$!!g')
 
+%global release_version 4_5_5
+
+%if 0%{?fedora} >= 24
+%global droplets droplets
+%else
+%global droplets dropins
+%endif
+
 Epoch: 1
 Summary: Eclipse Python development plug-in
 Name:    %{?scl_prefix}eclipse-pydev
-Version:          4.1.0
-Release:          2.5.bs2%{?dist}
+Version:          4.5.5
+Release:          1.1%{?dist}
 License:          EPL
 URL:              http://pydev.org
 
-Source0:          https://github.com/fabioz/Pydev/archive/pydev_4_1_0.tar.gz
+Source0:          https://github.com/fabioz/Pydev/archive/pydev_%{release_version}.tar.gz
 
 # Remove windows specific code that manipulates the windows registry
 Patch0:           remove-winregistry.patch
@@ -31,27 +39,35 @@ Patch4:           no-fund-raising-screen.patch
 # Fix for failing to kill django processes
 Patch5:           fix-process-killing.patch
 
+# Fixes mysterious empty shell when checking editor prefs
+Patch6:           remove-redundant-shell.patch
+
 Requires: %{?scl_prefix}eclipse-platform
 Requires: python
 Requires: %{?scl_prefix_java_common}apache-commons-logging
-Requires: %{?scl_prefix}snakeyaml
+Requires: %{?scl_prefix_java_common}snakeyaml
 Requires: %{?scl_prefix_java_common}ws-commons-util
 Requires: %{?scl_prefix_java_common}xmlrpc-common
 Requires: %{?scl_prefix_java_common}xmlrpc-client
 Requires: %{?scl_prefix_java_common}xmlrpc-server
 Requires: %{?scl_prefix}jython >= 2.7
+Requires: %{?scl_prefix}antlr32-java >= 3.2
+
 BuildRequires:    %{?scl_prefix}tycho >= 0.22.0-15
 BuildRequires:    %{?scl_prefix}tycho-extras
 BuildRequires:    %{?scl_prefix}eclipse-p2-discovery
 BuildRequires:    %{?scl_prefix}eclipse-mylyn-context-team >= 3.5.0
 BuildRequires:    %{?scl_prefix}eclipse-mylyn-ide >= 3.5.0
 BuildRequires:    %{?scl_prefix_java_common}apache-commons-logging
-BuildRequires:    %{?scl_prefix}snakeyaml
+BuildRequires:    %{?scl_prefix_java_common}snakeyaml
 BuildRequires:    %{?scl_prefix_java_common}ws-commons-util
 BuildRequires:    %{?scl_prefix_java_common}xmlrpc-common
 BuildRequires:    %{?scl_prefix_java_common}xmlrpc-client
 BuildRequires:    %{?scl_prefix_java_common}xmlrpc-server
 BuildRequires:    %{?scl_prefix}jython >= 2.7
+BuildRequires:    %{?scl_prefix_java_common}lucene5
+BuildRequires:    %{?scl_prefix_java_common}lucene5-analysis
+
 
 %description
 The eclipse-pydev package contains Eclipse plugins for
@@ -68,13 +84,14 @@ Mylyn Task-Focused UI extensions for Pydev.
 
 %prep
 %{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
-%setup -q -n Pydev-pydev_4_1_0
+%setup -q -n Pydev-pydev_%{release_version}
 %patch0
 %patch1 -p1
 %patch2 -p1
 %patch3
 %patch4
 %patch5 -p1
+%patch6 -p1
 
 %mvn_package "::pom:" __noinstall
 %mvn_package ":*.mylyn" mylyn
@@ -125,8 +142,15 @@ ln -sf %{_javadir_java_common}/xmlrpc-common.jar \
 ln -sf %{_javadir_java_common}/xmlrpc-server.jar \
        plugins/org.python.pydev.shared_interactive_console/xmlrpc-server-3.1.3.jar
 
-ln -sf %{_javadir_maven}/snakeyaml.jar \
+ln -sf %{_javadir_java_common}/snakeyaml.jar \
        plugins/org.python.pydev.shared_core/libs/snakeyaml-1.11.jar
+
+ln -sf %{_javadir_java_common}/lucene5/lucene-core-5.jar \
+       plugins/org.python.pydev.shared_core/libs/lucene-core-5.2.1.jar
+
+ln -sf %{_javadir_java_common}/lucene5/lucene-analyzers-common-5.jar \
+       plugins/org.python.pydev.shared_core/libs/lucene-analyzers-common-5.2.1.jar
+
 
 # Fix encodings
 iconv -f CP1252 -t UTF-8 LICENSE.txt > LICENSE.txt.utf
@@ -180,8 +204,15 @@ ln -sf %{_javadir_java_common}/xmlrpc-server.jar $file
 
 file=`find . -name snakeyaml-1.11.jar`
 rm $file
-ln -sf %{_javadir}/snakeyaml.jar $file
+ln -sf %{_javadir_java_common}/snakeyaml.jar $file
 
+file=`find . -name lucene-core-5.2.1.jar`
+rm $file
+ln -sf %{_javadir_java_common}/lucene5/lucene-core-5.jar $file
+
+file=`find . -name lucene-analyzers-common-5.2.1.jar`
+rm $file
+ln -sf %{_javadir_java_common}/lucene5/lucene-analyzers-common-5.jar $file
 popd
 
 # Symlink system jython and libs
@@ -209,6 +240,24 @@ fi
 %doc LICENSE.txt
 
 %changelog
+* Mon Apr 04 2016 Mat Booth <mat.booth@redhat.com> - 1:4.5.5-1.1
+- Fix redundant empty shell when checking editor prefs, rhbz#1311099
+
+* Tue Mar 29 2016 Sopot Cela <scela@redhat.com> - 1:4.5.5-1
+- Update to upstream 4.5.5
+
+* Mon Feb 29 2016 Mat Booth <mat.booth@redhat.com> - 1:4.5.4-0.2.git3694021.3
+- Rebuild 2016-02-29
+
+* Wed Feb 17 2016 Sopot Cela <scela@redhat.com> - 1:4.5.4-0.2.git3694021.2
+- Fix antlr dependency 
+
+* Wed Feb 17 2016 Sopot Cela <scela@redhat.com> - 1:4.5.4-0.2.git3694021.1
+- Fix snakeyaml, dependency issues and update fedora-compliant version
+
+* Wed Feb 17 2016 Sopot Cela <scela@redhat.com> - 1:4.5.4-0.1.git3694021
+- Upgrade to pre 4.5.4 release
+
 * Wed Oct 21 2015 Mat Booth <mat.booth@redhat.com> - 1:4.1.0-2.5
 - Fix for failing to kill django processes
 - rhbz#1264446

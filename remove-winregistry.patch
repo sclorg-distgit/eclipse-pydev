@@ -9,7 +9,7 @@
 -
  public class PythonInterpreterProviderFactory extends AbstractInterpreterProviderFactory {
  
-     public IInterpreterProvider[] getInterpreterProviders(InterpreterType type) {
+     @Override
 @@ -63,46 +60,6 @@ public class PythonInterpreterProviderFa
          } else {
              // On windows we can try to see the installed versions...

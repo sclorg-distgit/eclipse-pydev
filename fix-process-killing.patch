@@ -138,15 +138,14 @@ index 0000000..c8ec14f
 +        return contents.toString();
 +    }
 +}
-\ No newline at end of file
 diff --git a/plugins/org.python.pydev.debug/META-INF/MANIFEST.MF b/plugins/org.python.pydev.debug/META-INF/MANIFEST.MF
-index 0704b04..bf249fa 100644
+index e4ea072..12fd1ce 100644
 --- a/plugins/org.python.pydev.debug/META-INF/MANIFEST.MF
 +++ b/plugins/org.python.pydev.debug/META-INF/MANIFEST.MF
 @@ -3,8 +3,7 @@ Bundle-ManifestVersion: 2
  Bundle-Name: Pydev debug
  Bundle-SymbolicName: org.python.pydev.debug; singleton:=true
- Bundle-Version: 4.1.0.qualifier
+ Bundle-Version: 4.5.5.qualifier
 -Bundle-ClassPath: pydev-debug.jar,
 - libs/winp-1.19.jar
 +Bundle-ClassPath: pydev-debug.jar
