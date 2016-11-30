@@ -1,0 +1,12 @@
+--- plugins/org.python.pydev/src/org/python/pydev/editor/PyEdit.java.orig	2015-08-18 16:00:39.881989546 +0100
++++ plugins/org.python.pydev/src/org/python/pydev/editor/PyEdit.java	2015-08-18 16:00:45.682921665 +0100
+@@ -346,9 +346,6 @@
+             this.codeFoldingSetter = new CodeFoldingSetter(this);
+ 
+             CheckDefaultPreferencesDialog.askAboutSettings();
+-
+-            //Ask for people to consider funding PyDev.
+-            PydevShowBrowserMessage.show();
+         } catch (Throwable e) {
+             Log.log(e);
+         }

@@ -1,0 +1,14 @@
+diff --git a/plugins/org.python.pydev.shared_core/src/org/python/pydev/shared_core/io/FileUtils.java b/plugins/org.python.pydev.shared_core/src/org/python/pydev/shared_core/io/FileUtils.java
+index af6c883..924186a 100644
+--- a/plugins/org.python.pydev.shared_core/src/org/python/pydev/shared_core/io/FileUtils.java
++++ b/plugins/org.python.pydev.shared_core/src/org/python/pydev/shared_core/io/FileUtils.java
+@@ -675,6 +675,9 @@ public class FileUtils {
+ 
+                 } else if (lEnc.charAt(0) == '#') { //it must be a comment line
+ 
++                    if (lEnc.endsWith("-*-")) {
++                        lEnc = lEnc.substring(0, lEnc.length() - 3);
++                    }
+                     Matcher matcher = ENCODING_PATTERN.matcher(lEnc);
+                     if (matcher.find()) {
+                         ret = matcher.group(1).trim();

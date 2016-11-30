@@ -1,0 +1,14 @@
+--- a/plugins/org.python.pydev/pysrc/interpreterInfo.py
++++ b/plugins/org.python.pydev/pysrc/interpreterInfo.py
+@@ -259,6 +259,4 @@ if __name__ == '__main__':
+         import time
+         time.sleep(0.1)
+     except:
+-        pass
+-
+-    raise RuntimeError('Ok, this is so that it shows the output (ugly hack for some platforms, so that it releases the output).')
++        pass
+\ No newline at end of file
+-- 
+1.8.3.1
+
