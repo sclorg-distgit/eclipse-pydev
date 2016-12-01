@@ -2,7 +2,7 @@
 %{!?scl:%global pkg_name %{name}}
 %{?java_common_find_provides_and_requires}
 
-%global baserelease 2
+%global baserelease 3
 
 # Turn off the brp-python-bytecompile script
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-scl-python-bytecompile[[:space:]].*$!!g')
@@ -50,7 +50,6 @@ Requires: %{?scl_prefix_java_common}xmlrpc-client
 Requires: %{?scl_prefix_java_common}xmlrpc-server
 Requires: %{?scl_prefix}jython >= 2.7.1
 Requires: %{?scl_prefix}antlr32-java >= 3.2-12
-Requires: python-django
 BuildRequires:    %{?scl_prefix}tycho
 BuildRequires:    %{?scl_prefix}tycho-extras
 BuildRequires:    %{?scl_prefix}eclipse-mylyn >= 3.16.0
@@ -211,6 +210,9 @@ fi
 %doc LICENSE.txt
 
 %changelog
+* Mon Aug 01 2016 Mat Booth <mat.booth@redhat.com> - 1:5.1.2-1.3
+- Drop dep on django -- only available from EPEL
+
 * Fri Jul 29 2016 Mat Booth <mat.booth@redhat.com> - 1:5.1.2-1.2
 - Prevent bytecode compilation inside the SCL
 - Always use droplets location
