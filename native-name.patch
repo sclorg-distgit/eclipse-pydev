@@ -1,11 +1,11 @@
 --- plugins/org.python.pydev/pysrc/pydevd_attach_to_process/add_code_to_python_process.py.orig	2015-04-21 12:11:55.117830295 +0100
 +++ plugins/org.python.pydev/pysrc/pydevd_attach_to_process/add_code_to_python_process.py	2015-04-21 12:56:13.918310780 +0100
-@@ -413,7 +413,7 @@
+@@ -413,7 +413,7 @@ def run_python_code_linux(pid, python_co
  
      print('Attaching with arch: %s'% (arch,))
  
 -    target_dll = os.path.join(filedir, 'attach_linux_%s.so' % suffix)
-+    target_dll = os.path.join(filedir, 'attach_linux.so')
-     target_dll = os.path.normpath(target_dll)
++    target_dll = os.path.join(filedir, 'attach_linux.so' % suffix)
+     target_dll = os.path.abspath(os.path.normpath(target_dll))
      if not os.path.exists(target_dll):
          raise RuntimeError('Could not find dll file to inject: %s' % target_dll)

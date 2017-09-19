@@ -2,19 +2,17 @@
 %{!?scl:%global pkg_name %{name}}
 %{?java_common_find_provides_and_requires}
 
-%global baserelease 3
+%global baserelease 2
 
-# Turn off the brp-python-bytecompile script
+# Turn off the brp-scl-python-bytecompile script
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-scl-python-bytecompile[[:space:]].*$!!g')
 %global __jar_repack %{nil}
-%global release_version 5_1_2
-
-%global droplets droplets
+%global release_version 5_5_0
 
 Epoch: 1
 Summary: Eclipse Python development plug-in
 Name:    %{?scl_prefix}eclipse-pydev
-Version:          5.1.2
+Version:          5.5.0
 Release:          1.%{baserelease}%{?dist}
 License:          EPL
 URL:              http://pydev.org
@@ -37,8 +35,11 @@ Patch4:           fix-process-killing.patch
 # Fix valid encoding detection failure
 Patch5:           encoding-tolerance.patch
 
+# Don't package eclipse project files or source for natives in binary plugins
+Patch6:           exclude-project-files.patch
+
 # Remove fund-raising dialog
-Patch6:           no-fund-raising-screen.patch
+Patch7:           no-fund-raising-screen.patch
 
 Requires: %{?scl_prefix}eclipse-platform
 Requires: python
@@ -50,6 +51,11 @@ Requires: %{?scl_prefix_java_common}xmlrpc-client
 Requires: %{?scl_prefix_java_common}xmlrpc-server
 Requires: %{?scl_prefix}jython >= 2.7.1
 Requires: %{?scl_prefix}antlr32-java >= 3.2-12
+
+
+
+
+
 BuildRequires:    %{?scl_prefix}tycho
 BuildRequires:    %{?scl_prefix}tycho-extras
 BuildRequires:    %{?scl_prefix}eclipse-mylyn >= 3.16.0
@@ -63,6 +69,11 @@ BuildRequires:    %{?scl_prefix_java_common}xmlrpc-server
 BuildRequires:    %{?scl_prefix}jython >= 2.7.1
 BuildRequires:    %{?scl_prefix_java_common}lucene5
 BuildRequires:    %{?scl_prefix_java_common}lucene5-analysis
+
+# Required for symlinking into the plugin
+
+
+
 
 %description
 The eclipse-pydev package contains Eclipse plugins for
@@ -81,20 +92,24 @@ set -e -x
 %setup -q -n Pydev-pydev_%{release_version}
 %patch0
 %patch1 -p1
-%patch2 -p1
-%patch3
-%patch4 -p1
+%patch2 -p1 -b .sav
+%patch3 -b .sav
+%patch4 -p1 -b .sav
 %patch5 -p1
 %patch6
+%patch7
 
 %mvn_package "::pom:" __noinstall
 %mvn_package ":*.mylyn" mylyn
 %mvn_package ":*.mylyn.*" mylyn
 %mvn_package ":*" core
 
+# Fix line endings
+sed -i -e 's/\r$//' $(find plugins/org.python.pydev/pysrc -name "*.py")
+
 # Remove bundled ctypes (used only under cygwin)
 rm -r plugins/org.python.pydev/pysrc/third_party/wrapped_for_pydev
-# Remove bundled pep8 and lib2to3
+# Remove bundled lib2to3
 rm -r plugins/org.python.pydev/pysrc/third_party/pep8/lib2to3
 
 # Remove pre-built artifacts
@@ -167,7 +182,7 @@ set -e -x
 find ${RPM_BUILD_ROOT} -name attach_linux.so -exec chmod +x {} \;
 
 # Have to re-symlink embedded system jars
-installDir=${RPM_BUILD_ROOT}/%{_libdir}/eclipse/%{droplets}/pydev-core
+installDir=${RPM_BUILD_ROOT}/%{_libdir}/eclipse/droplets/pydev-core
 pushd $installDir/eclipse/plugins
 for f in commons-logging \
          ws-commons-util \
@@ -195,10 +210,7 @@ build-jar-repository -s -p . \
 popd
 
 # convert .py$ files from mode 0644 to mode 0755
-sixFourFourfiles=$(find ${RPM_BUILD_ROOT} -name '*\.py' -perm 0644 | xargs)
-if [ ${sixFourFourfiles:-0} -ne 0 ]; then
-  chmod 0755 ${sixFourFourfiles}
-fi
+sed -i -e '/.*\.py$/s/0644/0755/' .mfiles*
 %{?scl:EOF}
 
 
@@ -210,18 +222,34 @@ fi
 %doc LICENSE.txt
 
 %changelog
-* Mon Aug 01 2016 Mat Booth <mat.booth@redhat.com> - 1:5.1.2-1.3
-- Drop dep on django -- only available from EPEL
-
-* Fri Jul 29 2016 Mat Booth <mat.booth@redhat.com> - 1:5.1.2-1.2
-- Prevent bytecode compilation inside the SCL
-- Always use droplets location
-- Fixup references to asm 5 and lucene 5
+* Wed Jan 25 2017 Mat Booth <mat.booth@redhat.com> - 1:5.5.0-1.2
 - Patch out fund raising screen
 - Remove pep/autopep8 symlinking for now
 
-* Fri Jul 29 2016 Mat Booth <mat.booth@redhat.com> - 1:5.1.2-1.1
+* Tue Jan 24 2017 Mat Booth <mat.booth@redhat.com> - 1:5.5.0-1.1
 - Auto SCL-ise package for rh-eclipse46 collection
+
+* Tue Jan 24 2017 Mat Booth <mat.booth@redhat.com> - 1:5.5.0-1
+- Update to latest release
+
+* Tue Jan 17 2017 Mat Booth <mat.booth@redhat.com> - 1:5.4.0-3.2
+- Patch out fund raising screen
+- Remove pep/autopep8 symlinking for now
+
+* Tue Jan 17 2017 Mat Booth <mat.booth@redhat.com> - 1:5.4.0-3.1
+- Auto SCL-ise package for rh-eclipse46 collection
+
+* Tue Jan 17 2017 Mat Booth <mat.booth@redhat.com> - 1:5.4.0-3
+- Fix some minor packaging issues (perms, line endings, etc)
+
+* Mon Dec 19 2016 Miro Hrončok <mhroncok@redhat.com> - 1:5.4.0-2
+- Rebuild for Python 3.6
+
+* Mon Dec 19 2016 Alexander Kurtakov <akurtako@redhat.com> 1:5.4.0-1
+- Update to upstream 5.4.0.
+
+* Thu Sep 29 2016 Alexander Kurtakov <akurtako@redhat.com> 1:5.2.0-1
+- Update to upstream 5.2.0.
 
 * Fri Jun 24 2016 Mat Booth <mat.booth@redhat.com> - 1:5.1.2-1
 - Update to release 5.1.2

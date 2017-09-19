@@ -1,0 +1,19 @@
+--- plugins/org.python.pydev/build.properties.orig	2017-01-17 13:19:40.391748533 +0000
++++ plugins/org.python.pydev/build.properties	2017-01-17 13:32:44.990075591 +0000
+@@ -16,6 +16,16 @@
+                    src_completions/
+ output.pydev.jar = bin/
+ bin.excludes = pysrc/__pycache__/,\
++               pysrc/pydevd_attach_to_process/dll/,\
++               pysrc/pydevd_attach_to_process/linux/*.sh,\
++               pysrc/pydevd_attach_to_process/linux/*.c,\
++               pysrc/pydevd_attach_to_process/linux/*.h,\
++               pysrc/pydevd_attach_to_process/linux/Makefile,\
++               pysrc/pydevd_attach_to_process/winappdbg/,\
++               pysrc/.settings/,\
++               pysrc/.project,\
++               pysrc/.pydevproject,\
++               pysrc/.travis.yml,\
+                pysrc/*$py.class,\
+                *.pyc,\
+                pysrc/*.pyc,\
